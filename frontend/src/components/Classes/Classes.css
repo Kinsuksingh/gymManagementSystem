@@ -1,0 +1,13 @@
+/* ClassesPage.css */
+h1 {
+    margin-bottom: 2rem;
+  }
+  
+  .card {
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  

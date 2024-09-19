@@ -1,0 +1,33 @@
+/* HomePage.css */
+.hero {
+    background-image: url('https://wallpaperaccess.com/full/2968326.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+  }
+  
+  .features, .classes, .testimonials, .cta {
+    padding: 2rem 0;
+  }
+  
+  .features .card, .classes .card, .testimonials .card {
+    border: none;
+  }
+  
+  .features .card-title, .classes .card-title {
+    font-size: 1.5rem;
+  }
+  
+  .cta {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .cta h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .cta p {
+    margin-bottom: 2rem;
+  }
+  
