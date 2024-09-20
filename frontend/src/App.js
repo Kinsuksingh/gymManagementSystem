@@ -16,6 +16,7 @@ function App() {
   const [userType, setUserType] = useState(false)
 
   const handleLogout = () => {
+    setUserType(false)
     console.log("Logout")
   };
 

@@ -5,6 +5,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import './Home.css'; // Custom styles (if needed)
+import { Link } from 'react-router-dom';
 
 function Home() {
   return (
@@ -14,7 +15,7 @@ function Home() {
         <Container>
           <h1>Welcome to The Bros Gym</h1>
           <p>Your journey to fitness starts here!</p>
-          <Button variant="light" size="lg" href="/classes">
+          <Button as={Link} variant="light" size="lg" to="/classes">
             Explore Classes
           </Button>
         </Container>
