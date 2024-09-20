@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button';
 import { Link,useNavigate } from 'react-router-dom';
 import { LuDumbbell } from "react-icons/lu";
 
-function NavBar({isLogin, onLogout, isOwner }) {
+function NavBar({onLogout, isOwner }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -28,8 +28,8 @@ function NavBar({isLogin, onLogout, isOwner }) {
             {isOwner && <Nav.Link as={Link} to="/members">Members</Nav.Link>}
           </Nav>
           <Nav>
-            <Button variant={isLogin ? "outline-primary":"outline-danger"} onClick={handleLogout}>
-              {isLogin ? "Login" : "LogOut"}
+            <Button variant={true ? "outline-primary":"outline-danger"} onClick={handleLogout}>
+              {true ? "Login" : "LogOut"}
             </Button>
           </Nav>
         </Navbar.Collapse>
@@ -39,6 +39,7 @@ function NavBar({isLogin, onLogout, isOwner }) {
 }
 
 export default NavBar;
+
 
 
 

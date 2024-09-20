@@ -16,16 +16,14 @@ import { useState } from 'react';
 
 function App() {
   const [userType, setUserType] = useState(false)
-  const [isLogin, setIsLogin] = useState(true)
 
   const handleLogout = () => {
-    setIsLogin(false)
     console.log("Logout")
   };
 
   return (
     <Router>
-      <NavBar isLogin={isLogin} onLogout={handleLogout} isOwner={userType}/>
+      <NavBar onLogout={handleLogout} isOwner={userType}/>
       <Routes>
         <Route path='/login' element={<Login/>}></Route>
         <Route path='/signup' element={<SignUp/>}></Route>
