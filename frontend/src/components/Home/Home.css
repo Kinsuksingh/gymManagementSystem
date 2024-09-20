@@ -4,6 +4,7 @@
     background-size: cover;
     background-position: center;
     color: white;
+    margin-top: 55px;
   }
   
   .features, .classes, .testimonials, .cta {

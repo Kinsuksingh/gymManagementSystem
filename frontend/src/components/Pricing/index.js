@@ -6,6 +6,7 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import './Pricing.css'
 
 function Pricing({ isOwner }) {
   const [showModal, setShowModal] = useState(false); // For showing the modal
@@ -57,7 +58,7 @@ function Pricing({ isOwner }) {
   };
 
   return (
-    <Container>
+    <Container className='pricing-section'>
       <h1 className="text-center my-4">Membership Pricing</h1>
 
       {isOwner && (

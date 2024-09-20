@@ -5,6 +5,7 @@ import { Navbar, Nav, Button, Container } from 'react-bootstrap';
 import LoginModal from '../LoginModal';
 
 function NavBar({onLogout, isOwner, settingUserType }) {
+  const [expanded, setExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isLogin, setIsLogin] = useState(false)
   const navigate = useNavigate();
@@ -25,19 +26,18 @@ function NavBar({onLogout, isOwner, settingUserType }) {
 
   return (
     <>
-      <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary" bg="dark" data-bs-theme="dark" >
+      <Navbar fixed="top" collapseOnSelect expand="lg" className="bg-body-tertiary" bg="dark" data-bs-theme="dark" expanded={expanded} >
         <Container>
           <Navbar.Brand as={Link} to="/">Bros<LuDumbbell />Gym</Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" onClick={() => setExpanded(!expanded)} />
           <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
+            <Nav className="me-auto"></Nav>
+            <Nav onClick={() => setExpanded(false)}>
               <Nav.Link as={Link} to="/">Home</Nav.Link>
               <Nav.Link as={Link} to="/classes">Classes</Nav.Link>
               {isOwner && <Nav.Link as={Link} to="/members">Members</Nav.Link>}
               <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
               <Nav.Link as={Link} to="/account">Account</Nav.Link>
-            </Nav>
-            <Nav>
               <Button
                 variant={isLogin ? "outline-danger" : "outline-primary"}
                 onClick={isLogin ? handleLogout : handleLoginClick}

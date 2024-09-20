@@ -34,7 +34,7 @@ function Account() {
   };
 
   return (
-    <Container>
+    <Container className='acount-section'>
       <h1 className="text-center my-4">Your Account</h1>
       <Row className="justify-content-center">
         <Col md={6}>

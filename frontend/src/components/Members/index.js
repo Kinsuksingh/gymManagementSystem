@@ -58,7 +58,7 @@ function Members({ isOwner }) {
   }
 
   return (
-    <Container>
+    <Container style={{marginTop:"65px"}}>
       <h1 className="text-center my-4">Our Members</h1>
       {isOwner && (
         <Button variant="success" onClick={handleShow} className="mb-4">Add Member</Button>

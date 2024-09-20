@@ -50,7 +50,7 @@ function Classes({ isOwner }) {
   };
 
   return (
-    <Container>
+    <Container className='classes-section'>
       <h1 className="text-center my-4">Gym Classes</h1>
       {isOwner && (
         <Button variant="success" onClick={() => setShowModal(true)} className="mb-4">

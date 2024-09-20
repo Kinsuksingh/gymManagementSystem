@@ -2,6 +2,10 @@
 h1 {
     margin-bottom: 2rem;
   }
+
+  .classes-section{
+    margin-top: 65px;
+  }
   
   .card {
     transition: transform 0.2s ease-in-out;
