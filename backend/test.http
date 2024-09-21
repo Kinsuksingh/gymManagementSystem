@@ -1,0 +1,6 @@
+
+### Get all databases
+GET http://localhost:5000/api/databases
+
+### Check if a collection exists (Replace "collectionName" with the actual name)
+GET http://localhost:5000/api/check-collection/gym_management/classes
