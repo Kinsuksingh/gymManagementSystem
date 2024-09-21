@@ -3,6 +3,11 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
 import DbRoutes from './routes/dbRoutes.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const dbPassword = process.env.DB_PASSWORD;
+
 
 
 const app = express();
@@ -11,7 +16,7 @@ const app = express();
 app.use(cors({ origin: '*' }));
 
 // MongoDB Atlas connection string
-const url = "mongodb+srv://kinsuksingh:DQgR7yTw2oBqWANN@gymmanagement.jbhc3.mongodb.net/gymManagement?retryWrites=true&w=majority";
+const url = `mongodb+srv://kinsuksingh:${dbPassword}@gymmanagement.jbhc3.mongodb.net/gymManagement?retryWrites=true&w=majority`;
 const client = new MongoClient(url);
 
 mongoose.connect(url)
