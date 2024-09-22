@@ -1,129 +1,245 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+import Spinner from 'react-bootstrap/Spinner';
 import Container from 'react-bootstrap/Container';
+import { FaExclamationCircle } from "react-icons/fa";
+import { FaRegImage } from "react-icons/fa6";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import Alert from 'react-bootstrap/Alert';
 import './Classes.css';
 
-// Dummy data for classes
-const initialClasses = [
-    { id: 1, name: 'Yoga Class', instructor: 'Alice Johnson', schedule: 'Monday & Wednesday, 6 PM - 7 PM', description: 'A relaxing yoga class.', image: '' },
-    { id: 2, name: 'Spin Class', instructor: 'Bob Brown', schedule: 'Tuesday & Thursday, 5 PM - 6 PM', description: 'High-energy spin class.', image: '' },
-    { id: 3, name: 'Pilates', instructor: 'Charlie Davis', schedule: 'Friday, 7 AM - 8 AM', description: 'Core strengthening Pilates.', image: '' },
-    { id: 4, name: 'Zumba', instructor: 'Jane Smith', schedule: 'Saturday, 10 AM - 11 AM', description: 'Fun dance workout.', image: '' },
-    { id: 5, name: 'Body Pump', instructor: 'John Doe', schedule: 'Sunday, 9 AM - 10 AM', description: 'Full-body strength training.', image: '' },
-];
 
 function Classes({ isOwner }) {
-    const [classes, setClasses] = useState(initialClasses);
+    const [loadingAdd, setLoadingAdd] = useState(false);
+    const [loadingRemove, setLoadingRemove] = useState({});
+    const [loadingFetch, setLoadingFetch] = useState(true);
+    const [classes, setClasses] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newClass, setNewClass] = useState({
+        id: '',
         name: '',
         instructor: '',
         schedule: '',
         description: '',
         image: ''
-});
+    });
+    const [error, setError] = useState('');
+    const [isEditing, setIsEditing] = useState(false); // Track if editing or adding
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/classes');
+                await delay(400);
+                setClasses(response.data);
+            } catch (error) {
+                console.error('Error fetching classes:', error);
+            } finally {
+                setLoadingFetch(false);
+            }
+        };
 
-  const handleInputChange = (e) => {
+        fetchClasses();
+    }, []);
+
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewClass({ ...newClass, [name]: value });
-  }
+        setError('');
+    };
 
-    const handleAddClass = () => {
-        setClasses([...classes, { ...newClass, id: classes.length + 1 }]);
-        setNewClass({
-            name: '',
-            instructor: '',
-            schedule: '',
-            description: '',
-            image: ''
-        });
+    const handleAddClass = async () => {
+        if (!newClass.name || !newClass.instructor || !newClass.schedule || !newClass.description) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+
+        setLoadingAdd(true);
+        const classWithId = { ...newClass, id: uuidv4() };
+
+        try {
+            await axios.post('/api/classes', classWithId);
+            setClasses([...classes, classWithId]);
+            resetModal();
+        } catch (error) {
+            console.error('Error adding class:', error);
+        } finally {
+            setLoadingAdd(false);
+        }
+    };
+
+    const handleEditClass = async () => {
+        if (!newClass.name || !newClass.instructor || !newClass.schedule || !newClass.description) {
+            setError('Please fill in all required fields.');
+            return;
+        }
+
+        setLoadingAdd(true);
+
+        try {
+            await axios.put(`/api/classes/${newClass.id}`, newClass);
+            setClasses(classes.map(classItem => (classItem.id === newClass.id ? newClass : classItem)));
+            resetModal();
+        } catch (error) {
+            console.error('Error editing class:', error);
+        } finally {
+            setLoadingAdd(false);
+        }
+    };
+
+    const handleRemoveClass = async (id) => {
+        setLoadingRemove((prev) => ({ ...prev, [id]: true }));
+        try {
+            await axios.delete(`http://localhost:5000/api/classes/${id}`);
+            setClasses(classes.filter(classItem => classItem.id !== id));
+        } catch (error) {
+            console.error('Error removing class:', error);
+        } finally {
+            setLoadingRemove((prev) => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const openEditModal = (classItem) => {
+        setNewClass(classItem);
+        setIsEditing(true);
+        setShowModal(true);
+    };
+
+    const resetModal = () => {
+        setNewClass({ id: '', name: '', instructor: '', schedule: '', description: '', image: '' });
+        setIsEditing(false);
         setShowModal(false);
-};
+    };
 
-  const handleRemoveClass = (id) => {
-    setClasses(classes.filter(classItem => classItem.id !== id));
-  };
+    // Function to truncate description to 1.5 lines
+    const truncateDescription = (text) => {
+        if (text.length <= 60) return text;
+        return text.substring(0, 70) + '...';
+    };
 
-  return (
-    <Container className='classes-section'>
-      <h1 className="text-center my-4">Gym Classes</h1>
-      {isOwner && (
-        <Button variant="success" onClick={() => setShowModal(true)} className="mb-4">
-          Add Class
-        </Button>
-      )}
-      <Row>
-        {classes.map(classItem => (
-          <Col md={4} key={classItem.id} className="mb-4">
-            <Card>
-              <Card.Body>
-                <Card.Title>{classItem.name}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">Instructor: {classItem.instructor}</Card.Subtitle>
-                <Card.Text>
-                  Schedule: <strong>{classItem.schedule}</strong>
-                </Card.Text>
-                <Card.Text>
-                  Description: {classItem.description}
-                </Card.Text>
-                {classItem.image ? (
-                  <Card.Img variant="top" src={classItem.image} alt={classItem.name} />
-                ) : (
-                  <Card.Img variant="top" src="placeholder.jpg" alt="No image available" />
-                )}
-                {isOwner && (
-                  <Button variant="danger" onClick={() => handleRemoveClass(classItem.id)}>Remove Class</Button>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+    return (
+        <Container className='classes-section'>
+            <h1 className="text-center my-4">Gym Classes</h1>
+            {isOwner && (
+                <Button variant="success" onClick={() => setShowModal(true)} className="mb-4">
+                    Add Class
+                </Button>
+            )}
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Class</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Class Title</Form.Label>
-              <Form.Control type="text" name="name" value={newClass.name} onChange={handleInputChange} placeholder="Class Title" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Instructor Name</Form.Label>
-              <Form.Control type="text" name="instructor" value={newClass.instructor} onChange={handleInputChange} placeholder="Instructor Name" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Schedule</Form.Label>
-              <Form.Control type="text" name="schedule" value={newClass.schedule} onChange={handleInputChange} placeholder="Schedule" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control as="textarea" rows={3} name="description" value={newClass.description} onChange={handleInputChange} placeholder="Class Description" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Class Image (URL)</Form.Label>
-              <Form.Control type="text" name="image" value={newClass.image} onChange={handleInputChange} placeholder="Image URL (optional)" />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleAddClass}>
-            Add Class
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
-  );
+            {loadingFetch ? (
+                <div className="text-center">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                </div>
+            ) : (
+                <Row>
+                    {classes.length === 0 ? (
+                        <Col className="text-center">
+                            <FaExclamationCircle size={100} className="mb-3" />
+                            <h3>Classes not available</h3>
+                        </Col>
+                    ) : (
+                        classes.map(classItem => (
+                            <Col md={4} key={classItem.id} className="mb-4">
+                                <Card>
+                                {classItem.image ? (
+                                            <Card.Img variant="top" src={classItem.image} alt={classItem.name} className="card-img"  />
+                                        ) : (
+                                          <div className="text-center">
+                                            <FaRegImage size={200} />
+                                          </div>
+                                        )}
+                                    <Card.Body>
+                                        <Card.Title>{classItem.name}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">Instructor: {classItem.instructor}</Card.Subtitle>
+                                        <Card.Text>
+                                            Schedule: <strong>{classItem.schedule}</strong>
+                                        </Card.Text>
+                                        <Card.Text>
+                                            Description: {truncateDescription(classItem.description)}
+                                        </Card.Text>
+                                    </Card.Body>
+                                    {isOwner ? (
+                                            <div className='d-flex m-3'>
+                                                <Button className='me-2' variant="warning" onClick={() => openEditModal(classItem)}>
+                                                    Edit
+                                                </Button>
+                                                <Button variant="danger" onClick={() => handleRemoveClass(classItem.id)} disabled={loadingRemove[classItem.id]}>
+                                                    {loadingRemove[classItem.id] ? (
+                                                        <>
+                                                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                                            Removing...
+                                                        </>
+                                                    ) : (
+                                                        'Remove Class'
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        ): (
+                                          <Button className='m-2' variant="success">
+                                            Start Now
+                                          </Button>)}
+                                </Card>
+                            </Col>
+                        ))
+                    )}
+                </Row>
+            )}
+
+            <Modal show={showModal} onHide={resetModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{isEditing ? 'Edit Class' : 'Add New Class'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {error && <Alert variant="danger">{error}</Alert>}
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Class Title</Form.Label>
+                            <Form.Control type="text" name="name" value={newClass.name} onChange={handleInputChange} placeholder="Class Title" />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Instructor Name</Form.Label>
+                            <Form.Control type="text" name="instructor" value={newClass.instructor} onChange={handleInputChange} placeholder="Instructor Name" />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Schedule</Form.Label>
+                            <Form.Control type="text" name="schedule" value={newClass.schedule} onChange={handleInputChange} placeholder="Schedule" />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control as="textarea" rows={3} name="description" value={newClass.description} onChange={handleInputChange} placeholder="Class Description" />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Class Image (URL)</Form.Label>
+                            <Form.Control type="text" name="image" value={newClass.image} onChange={handleInputChange} placeholder="Image URL (optional)" />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={resetModal}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={isEditing ? handleEditClass : handleAddClass} disabled={loadingAdd}>
+                        {loadingAdd ? (
+                            <>
+                                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                {isEditing ? 'Editing...' : 'Adding...'}
+                            </>
+                        ) : (
+                            isEditing ? 'Save Changes' : 'Add Class'
+                        )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container>
+    );
 }
 
 export default Classes;
-

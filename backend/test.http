@@ -4,3 +4,57 @@ GET http://localhost:5000/api/databases
 
 ### Check if a collection exists (Replace "collectionName" with the actual name)
 GET http://localhost:5000/api/check-collection/gym_management/classes
+
+
+### Test POST /api/classes
+POST http://localhost:5000/api/classes
+Content-Type: application/json
+
+{
+    "name": "Test Yoga Class",
+    "instructor": "Test Instructor",
+    "schedule": "Monday, 7 PM - 8 PM",
+    "description": "Test description for yoga class.",
+    "image": "https://example.com/test-yoga.jpg"
+}
+
+
+
+### 1. Add a New Class (POST)
+POST http://localhost:5000/api/classes
+Content-Type: application/json
+
+{ "id":"234324",
+    "name": "Body Pump", 
+"instructor": "Charlie Davis", 
+"schedule": "Friday, 7 AM - 8 AM", 
+"description": "Core strengthening Pilates.", 
+"image": "" }
+
+###
+
+### 2. Get All Classes (GET)
+GET http://localhost:5000/api/classes
+
+###
+
+### 3. Get a Single Class by ID (GET)
+GET http://localhost:5000/api/classes/234324
+
+# Replace `{{classId}}` with the actual class ID you want to fetch, or you can copy-paste the ID from the previous step’s response.
+
+###
+
+### 4. Update a Class (PUT)
+PUT http://localhost:5000/api/classes/234324
+Content-Type: application/json
+
+{
+    "name": "Advanced Strength Training",
+    "instructor": "John Doe",
+    "schedule": "Monday & Wednesday, 7 AM - 8 AM",
+    "description": "Advanced level strength and endurance training."
+}
+
+### 5. Delete a Class (DELETE)
+DELETE http://localhost:5000/api/classes/66efdd96b9773b6a21348c55
