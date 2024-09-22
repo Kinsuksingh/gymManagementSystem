@@ -16,6 +16,7 @@ import './Classes.css';
 
 
 function Classes({ isOwner }) {
+    const [serverErr, setServerErr] = useState(false)
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [loadingRemove, setLoadingRemove] = useState({});
     const [loadingFetch, setLoadingFetch] = useState(true);
@@ -35,10 +36,12 @@ function Classes({ isOwner }) {
     useEffect(() => {
         const fetchClasses = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/classes');
+                setServerErr(false);
+                const response = await axios.get('/api/classes');
                 await delay(400);
                 setClasses(response.data);
             } catch (error) {
+                setServerErr(true);
                 console.error('Error fetching classes:', error);
             } finally {
                 setLoadingFetch(false);
@@ -61,7 +64,14 @@ function Classes({ isOwner }) {
         }
 
         setLoadingAdd(true);
-        const classWithId = { ...newClass, id: uuidv4() };
+        const classWithId = {
+            id: uuidv4(),
+            name: newClass.name,
+            instructor: newClass.instructor,
+            schedule: newClass.schedule,
+            description: truncateDescription(newClass.description),
+            image: newClass.image
+        };
 
         try {
             await axios.post('/api/classes', classWithId);
@@ -81,10 +91,14 @@ function Classes({ isOwner }) {
         }
 
         setLoadingAdd(true);
+        const updatedClass = {
+            ...newClass,
+            description: truncateDescription(newClass.description)
+        };
 
         try {
-            await axios.put(`/api/classes/${newClass.id}`, newClass);
-            setClasses(classes.map(classItem => (classItem.id === newClass.id ? newClass : classItem)));
+            await axios.put(`/api/classes/${newClass.id}`, updatedClass);
+            setClasses(classes.map(classItem => classItem.id === newClass.id ? updatedClass : classItem));
             resetModal();
         } catch (error) {
             console.error('Error editing class:', error);
@@ -96,7 +110,7 @@ function Classes({ isOwner }) {
     const handleRemoveClass = async (id) => {
         setLoadingRemove((prev) => ({ ...prev, [id]: true }));
         try {
-            await axios.delete(`http://localhost:5000/api/classes/${id}`);
+            await axios.delete(`/api/classes/${id}`);
             setClasses(classes.filter(classItem => classItem.id !== id));
         } catch (error) {
             console.error('Error removing class:', error);
@@ -117,7 +131,7 @@ function Classes({ isOwner }) {
         setShowModal(false);
     };
 
-    // Function to truncate description to 1.5 lines
+    // Function to truncate description to 70 character
     const truncateDescription = (text) => {
         if (text.length <= 60) return text;
         return text.substring(0, 70) + '...';
@@ -143,7 +157,7 @@ function Classes({ isOwner }) {
                     {classes.length === 0 ? (
                         <Col className="text-center">
                             <FaExclamationCircle size={100} className="mb-3" />
-                            <h3>Classes not available</h3>
+                            <h3>{serverErr?"Internal Server Error":"Classes not available"}</h3>
                         </Col>
                     ) : (
                         classes.map(classItem => (
@@ -152,9 +166,9 @@ function Classes({ isOwner }) {
                                 {classItem.image ? (
                                             <Card.Img variant="top" src={classItem.image} alt={classItem.name} className="card-img"  />
                                         ) : (
-                                          <div className="text-center">
-                                            <FaRegImage size={200} />
-                                          </div>
+                                            <div className="text-center">
+                                                <FaRegImage size={200} />
+                                            </div>
                                         )}
                                     <Card.Body>
                                         <Card.Title>{classItem.name}</Card.Title>
@@ -163,7 +177,7 @@ function Classes({ isOwner }) {
                                             Schedule: <strong>{classItem.schedule}</strong>
                                         </Card.Text>
                                         <Card.Text>
-                                            Description: {truncateDescription(classItem.description)}
+                                            Description: {classItem.description}
                                         </Card.Text>
                                     </Card.Body>
                                     {isOwner ? (
@@ -183,9 +197,9 @@ function Classes({ isOwner }) {
                                                 </Button>
                                             </div>
                                         ): (
-                                          <Button className='m-2' variant="success">
-                                            Start Now
-                                          </Button>)}
+                                            <Button className='m-2' variant="success">
+                                                Start Now
+                                            </Button>)}
                                 </Card>
                             </Col>
                         ))
