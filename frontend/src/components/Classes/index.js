@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import Spinner from 'react-bootstrap/Spinner';
-import Container from 'react-bootstrap/Container';
+import {Container,Col,Row,Alert,Card,Button,Modal,Form,Spinner } from 'react-bootstrap';
 import { FaExclamationCircle, FaEdit, FaTrashAlt, FaPlusCircle, FaPlayCircle } from "react-icons/fa";
 import { FaRegImage } from "react-icons/fa6";
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
 import './Classes.css';
 
 function Classes({ isOwner }) {
@@ -141,7 +133,7 @@ function Classes({ isOwner }) {
             <h1 className="text-center my-4">Gym Classes</h1>
             {isOwner && (
                 <Button variant="success" onClick={() => setShowModal(true)} className="mb-4">
-                    <FaPlusCircle /> Add Class
+                    <FaPlusCircle className='mb-1' /> Add Class
                 </Button>
             )}
 
@@ -182,7 +174,7 @@ function Classes({ isOwner }) {
                                     {isOwner ? (
                                         <div className='d-flex m-3'>
                                             <Button className='me-2' variant="warning" onClick={() => openEditModal(classItem)}>
-                                                <FaEdit /> Edit
+                                                <FaEdit className='mb-1' /> Edit
                                             </Button>
                                             <Button variant="danger" onClick={() => handleRemoveClass(classItem.id)} disabled={loadingRemove[classItem.id]}>
                                                 {loadingRemove[classItem.id] ? (
@@ -192,7 +184,7 @@ function Classes({ isOwner }) {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <FaTrashAlt /> Remove Class
+                                                        <FaTrashAlt className='mb-1' /> Remove Class
                                                     </>
                                                 )}
                                             </Button>
@@ -214,7 +206,6 @@ function Classes({ isOwner }) {
                     <Modal.Title>{isEditing ? 'Edit Class' : 'Add New Class'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {error && <Alert variant="danger">{error}</Alert>}
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label>Class Title</Form.Label>
@@ -237,6 +228,7 @@ function Classes({ isOwner }) {
                             <Form.Control type="text" name="image" value={newClass.image} onChange={handleInputChange} placeholder="Image URL (optional)" />
                         </Form.Group>
                     </Form>
+                    {error && <Alert className='text-center' variant="danger">{error}</Alert>}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={resetModal}>
@@ -246,7 +238,7 @@ function Classes({ isOwner }) {
                         {loadingAdd ? (
                             <>
                                 <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                {isEditing ? 'Editing...' : 'Adding...'}
+                                {isEditing ? 'Updating...' : 'Adding...'}
                             </>
                         ) : (
                             isEditing ? 'Save Changes' : 'Add Class'

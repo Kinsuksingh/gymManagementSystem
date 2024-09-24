@@ -81,20 +81,21 @@ POST http://localhost:5000/api/members
 Content-Type: application/json
 
 {
-    "firstName": "Alice",
-    "lastName": "Johnson",
-    "email": "alice.johnson@example.com",
-    "membershipType": "Platinum",
-    "paymentMode": "Credit Card",
-    "workoutExperience": "Advanced",
-    "membershipStart": "2024-01-01",
-    "membershipEnd": "2024-12-31"
+    "userId":"1smmd",
+    "firstName": "Alicesd",
+    "lastName": "Johnsond",
+    "email": "alice.johnsoen@examffdple.com",
+    "membershipType": "Platinudm",
+    "paymentMode": "Credit Cdard",
+    "workoutExperience": "Addvanced",
+    "membershipStart": "2025-01-01",
+    "membershipEnd": "2025-12-31"
 }
 
 ###
 
 ### Update a member by ID
-PUT http://localhost:5000/api/members/66f2e9501420c6b29c3539f3
+PUT http://localhost:5000/api/members/1323
 Content-Type: application/json
 
 {
@@ -111,5 +112,5 @@ Content-Type: application/json
 ###
 
 ### Delete a member by ID
-DELETE http://localhost:5000/api/members/66f2e9501420c6b29c3539f3
+DELETE http://localhost:5000/api/members/1323
 Content-Type: application/json
