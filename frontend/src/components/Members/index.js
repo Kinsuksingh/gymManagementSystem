@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -6,17 +6,18 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-
-// Dummy data for members
-const initialMembers = [
-  { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', membershipType: 'Gold', paymentMode: 'Credit Card', workoutExperience: 'Intermediate', membershipStart: '2023-01-01', membershipEnd: '2023-12-31' },
-  { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', membershipType: 'Silver', paymentMode: 'Cash', workoutExperience: 'Beginner', membershipStart: '2023-02-01', membershipEnd: '2023-11-30' },
-  // Add more dummy data as needed
-];
+import { Spinner } from 'react-bootstrap';  // For loading spinner
+import axios from 'axios';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';  // Icons from react-icons
 
 function Members({ isOwner }) {
-  const [members, setMembers] = useState(initialMembers);
+  const [members, setMembers] = useState([]);
   const [show, setShow] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [currentMemberId, setCurrentMemberId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);  // Loader state
+  const [serverError, setServerError] = useState(''); // Server error state
+  const [formError, setFormError] = useState('');     // Form error state
   const [newMember, setNewMember] = useState({
     firstName: '',
     lastName: '',
@@ -28,27 +29,115 @@ function Members({ isOwner }) {
     membershipEnd: '',
   });
 
-  const handleClose = () => setShow(false);
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  const fetchMembers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/api/members');
+      setMembers(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      setServerError('Failed to load members. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setShow(false);
+    resetForm();
+    setIsEdit(false);
+    setCurrentMemberId(null);
+  };
+
   const handleShow = () => setShow(true);
+
+  const resetForm = () => {
+    setNewMember({
+      firstName: '',
+      lastName: '',
+      email: '',
+      membershipType: '',
+      paymentMode: '',
+      workoutExperience: '',
+      membershipStart: '',
+      membershipEnd: '',
+    });
+    setFormError('');
+    setServerError('');
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNewMember({
       ...newMember,
-      [name]: value
+      [name]: value,
     });
   };
 
-  const handleAddMember = () => {
-    setMembers([...members, { ...newMember, id: members.length + 1 }]);
-    handleClose();
+  const validateForm = () => {
+    const { firstName, lastName, email, membershipType, paymentMode } = newMember;
+    if (!firstName || !lastName || !email || !membershipType || !paymentMode) {
+      setFormError('All fields are required.');
+      return false;
+    }
+    setFormError('');
+    return true;
   };
 
-  const handleRemoveMember = (id) => {
-    setMembers(members.filter(member => member.id !== id));
+  const handleSaveMember = async () => {
+    if (!validateForm()) return; // Exit if form is invalid
+    setIsLoading(true);
+
+    try {
+      if (isEdit) {
+        await axios.put(`/api/members/${currentMemberId}`, newMember);
+      } else {
+        await axios.post('/api/members', newMember);
+      }
+      fetchMembers();
+      handleClose();
+    } catch (error) {
+      console.error('Error saving member:', error);
+      setServerError('Error occurred while saving. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (!isOwner || !isOwner) {
+  const handleEditMember = (member) => {
+    setIsEdit(true);
+    setCurrentMemberId(member._id);
+    setNewMember({
+      firstName: member.firstName,
+      lastName: member.lastName,
+      email: member.email,
+      membershipType: member.membershipType,
+      paymentMode: member.paymentMode,
+      workoutExperience: member.workoutExperience,
+      membershipStart: member.membershipStart,
+      membershipEnd: member.membershipEnd,
+    });
+    handleShow();
+  };
+
+  const handleRemoveMember = async (id) => {
+    setIsLoading(true);
+    try {
+      await axios.delete(`/api/members/${id}`);
+      fetchMembers();
+    } catch (error) {
+      console.error('Error removing member:', error);
+      setServerError('Error occurred while removing. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isOwner) {
     return (
       <Container>
         <h1 className="text-center my-4">Access Denied</h1>
@@ -58,39 +147,53 @@ function Members({ isOwner }) {
   }
 
   return (
-    <Container style={{marginTop:"65px"}}>
+    <Container style={{ marginTop: "65px" }}>
       <h1 className="text-center my-4">Our Members</h1>
-      {isOwner && (
-        <Button variant="success" onClick={handleShow} className="mb-4">Add Member</Button>
+      {serverError && <p className="text-danger text-center">{serverError}</p>}
+      {members.length === 0 ? (
+        <p className="text-center">No members found. Please add members.</p>
+      ) : (
+        <Row>
+          {members.map(member => (
+            <Col md={4} key={member._id} className="mb-4">
+              <Card>
+                <Card.Body>
+                  <Card.Title>{member.firstName} {member.lastName}</Card.Title>
+                  <Card.Subtitle className="mb-2 text-muted">{member.email}</Card.Subtitle>
+                  <Card.Text>
+                    Membership Type: <strong>{member.membershipType}</strong><br />
+                    Payment Mode: <strong>{member.paymentMode}</strong><br />
+                    Workout Experience: <strong>{member.workoutExperience}</strong><br />
+                    Membership: <strong>{member.membershipStart} to {member.membershipEnd}</strong>
+                  </Card.Text>
+                  {isOwner && (
+                    <>
+                      <Button variant="primary" className="me-2" onClick={() => handleEditMember(member)}>
+                        <FaEdit /> Edit
+                      </Button>
+                      <Button variant="danger" onClick={() => handleRemoveMember(member._id)}>
+                        <FaTrash /> Remove
+                      </Button>
+                    </>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       )}
-      <Row>
-        {members.map(member => (
-          <Col md={4} key={member.id} className="mb-4">
-            <Card>
-              <Card.Body>
-                <Card.Title>{member.firstName} {member.lastName}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">{member.email}</Card.Subtitle>
-                <Card.Text>
-                  Membership Type: <strong>{member.membershipType}</strong><br />
-                  Payment Mode: <strong>{member.paymentMode}</strong><br />
-                  Workout Experience: <strong>{member.workoutExperience}</strong><br />
-                  Membership: <strong>{member.membershipStart} to {member.membershipEnd}</strong>
-                </Card.Text>
-                {isOwner && (
-                  <Button variant="danger" onClick={() => handleRemoveMember(member.id)}>Remove Member</Button>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+
+      <Button variant="success" onClick={handleShow} className="mb-4">
+        <FaPlus /> Add Member
+      </Button>
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Add New Member</Modal.Title>
+          <Modal.Title>{isEdit ? 'Edit Member' : 'Add New Member'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
+            {formError && <p className="text-danger">{formError}</p>}
             <Form.Group className="mb-3">
               <Form.Label>First Name</Form.Label>
               <Form.Control type="text" name="firstName" value={newMember.firstName} onChange={handleChange} />
@@ -129,8 +232,8 @@ function Members({ isOwner }) {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleAddMember}>
-            Add Member
+          <Button variant="primary" onClick={handleSaveMember}>
+            {isEdit ? 'Update Member' : 'Add Member'}
           </Button>
         </Modal.Footer>
       </Modal>

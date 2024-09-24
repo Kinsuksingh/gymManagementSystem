@@ -3,7 +3,10 @@
 GET http://localhost:5000/api/databases
 
 ### Check if a collection exists (Replace "collectionName" with the actual name)
-GET http://localhost:5000/api/check-collection/gym_management/classes
+GET http://localhost:5000/api/check-collection/gym_management/members
+
+
+
 
 
 ### Test POST /api/classes
@@ -58,3 +61,55 @@ Content-Type: application/json
 
 ### 5. Delete a Class (DELETE)
 DELETE http://localhost:5000/api/classes/66efdd96b9773b6a21348c55
+
+
+
+
+
+
+
+
+
+### Get all members
+GET http://localhost:5000/api/members
+Content-Type: application/json
+
+###
+
+### Create a new member
+POST http://localhost:5000/api/members
+Content-Type: application/json
+
+{
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "email": "alice.johnson@example.com",
+    "membershipType": "Platinum",
+    "paymentMode": "Credit Card",
+    "workoutExperience": "Advanced",
+    "membershipStart": "2024-01-01",
+    "membershipEnd": "2024-12-31"
+}
+
+###
+
+### Update a member by ID
+PUT http://localhost:5000/api/members/66f2e9501420c6b29c3539f3
+Content-Type: application/json
+
+{
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "email": "alice.updated@example.com",
+    "membershipType": "Gold",
+    "paymentMode": "Debit Card",
+    "workoutExperience": "Expert",
+    "membershipStart": "2024-02-01",
+    "membershipEnd": "2025-01-31"
+}
+
+###
+
+### Delete a member by ID
+DELETE http://localhost:5000/api/members/66f2e9501420c6b29c3539f3
+Content-Type: application/json

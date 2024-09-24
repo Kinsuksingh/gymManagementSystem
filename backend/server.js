@@ -4,7 +4,8 @@ import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
 import DbRoutes from './routes/dbRoutes.js';
 import dotenv from 'dotenv';
-import classRoutes from './routes/classRoutes.js'; // Adjust based on your folder structure
+import classRoutes from './routes/classRoutes.js';
+import membersRouter from './routes/memberRoutes.js'
 
 
 
@@ -43,6 +44,7 @@ connectMongoClient();
 const dbRoutes = new DbRoutes(client);
 app.use('/api', dbRoutes.getRouter());  // Use the routes under '/api' prefix
 app.use('/api', classRoutes); // Add this line to use the class routes
+app.use('/api/members', membersRouter);
 
 
 
