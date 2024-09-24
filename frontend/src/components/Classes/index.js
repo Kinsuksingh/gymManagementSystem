@@ -3,7 +3,7 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import Spinner from 'react-bootstrap/Spinner';
 import Container from 'react-bootstrap/Container';
-import { FaExclamationCircle } from "react-icons/fa";
+import { FaExclamationCircle, FaEdit, FaTrashAlt, FaPlusCircle, FaPlayCircle } from "react-icons/fa";
 import { FaRegImage } from "react-icons/fa6";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -14,9 +14,8 @@ import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
 import './Classes.css';
 
-
 function Classes({ isOwner }) {
-    const [serverErr, setServerErr] = useState(false)
+    const [serverErr, setServerErr] = useState(false);
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [loadingRemove, setLoadingRemove] = useState({});
     const [loadingFetch, setLoadingFetch] = useState(true);
@@ -33,6 +32,7 @@ function Classes({ isOwner }) {
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false); // Track if editing or adding
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     useEffect(() => {
         const fetchClasses = async () => {
             try {
@@ -131,7 +131,6 @@ function Classes({ isOwner }) {
         setShowModal(false);
     };
 
-    // Function to truncate description to 70 character
     const truncateDescription = (text) => {
         if (text.length <= 60) return text;
         return text.substring(0, 70) + '...';
@@ -142,7 +141,7 @@ function Classes({ isOwner }) {
             <h1 className="text-center my-4">Gym Classes</h1>
             {isOwner && (
                 <Button variant="success" onClick={() => setShowModal(true)} className="mb-4">
-                    Add Class
+                    <FaPlusCircle /> Add Class
                 </Button>
             )}
 
@@ -157,19 +156,19 @@ function Classes({ isOwner }) {
                     {classes.length === 0 ? (
                         <Col className="text-center">
                             <FaExclamationCircle size={100} className="mb-3" />
-                            <h3>{serverErr?"Internal Server Error":"Classes not available"}</h3>
+                            <h3>{serverErr ? "Internal Server Error" : "Classes not available"}</h3>
                         </Col>
                     ) : (
                         classes.map(classItem => (
                             <Col md={4} key={classItem.id} className="mb-4">
                                 <Card>
-                                {classItem.image ? (
-                                            <Card.Img variant="top" src={classItem.image} alt={classItem.name} className="card-img"  />
-                                        ) : (
-                                            <div className="text-center">
-                                                <FaRegImage size={200} />
-                                            </div>
-                                        )}
+                                    {classItem.image ? (
+                                        <Card.Img variant="top" src={classItem.image} alt={classItem.name} className="card-img" />
+                                    ) : (
+                                        <div className="text-center">
+                                            <FaRegImage size={200} />
+                                        </div>
+                                    )}
                                     <Card.Body>
                                         <Card.Title>{classItem.name}</Card.Title>
                                         <Card.Subtitle className="mb-2 text-muted">Instructor: {classItem.instructor}</Card.Subtitle>
@@ -181,25 +180,28 @@ function Classes({ isOwner }) {
                                         </Card.Text>
                                     </Card.Body>
                                     {isOwner ? (
-                                            <div className='d-flex m-3'>
-                                                <Button className='me-2' variant="warning" onClick={() => openEditModal(classItem)}>
-                                                    Edit
-                                                </Button>
-                                                <Button variant="danger" onClick={() => handleRemoveClass(classItem.id)} disabled={loadingRemove[classItem.id]}>
-                                                    {loadingRemove[classItem.id] ? (
-                                                        <>
-                                                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
-                                                            Removing...
-                                                        </>
-                                                    ) : (
-                                                        'Remove Class'
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        ): (
-                                            <Button className='m-2' variant="success">
-                                                Start Now
-                                            </Button>)}
+                                        <div className='d-flex m-3'>
+                                            <Button className='me-2' variant="warning" onClick={() => openEditModal(classItem)}>
+                                                <FaEdit /> Edit
+                                            </Button>
+                                            <Button variant="danger" onClick={() => handleRemoveClass(classItem.id)} disabled={loadingRemove[classItem.id]}>
+                                                {loadingRemove[classItem.id] ? (
+                                                    <>
+                                                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                                                        Removing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FaTrashAlt /> Remove Class
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Button className='m-2' variant="success">
+                                            <FaPlayCircle /> Start Now
+                                        </Button>
+                                    )}
                                 </Card>
                             </Col>
                         ))

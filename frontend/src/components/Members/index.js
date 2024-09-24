@@ -38,10 +38,10 @@ function Members({ isOwner }) {
     try {
       const response = await axios.get('/api/members');
       setMembers(response.data);
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching members:', error);
       setServerError('Failed to load members. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -91,9 +91,11 @@ function Members({ isOwner }) {
   const handleSaveMember = async () => {
     if (!validateForm()) return; // Exit if form is invalid
     setIsLoading(true);
+    setServerError(''); // Clear any previous server error
 
     try {
       if (isEdit) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // Adding delay for UX
         await axios.put(`/api/members/${currentMemberId}`, newMember);
       } else {
         await axios.post('/api/members', newMember);
@@ -126,6 +128,7 @@ function Members({ isOwner }) {
 
   const handleRemoveMember = async (id) => {
     setIsLoading(true);
+    setServerError(''); // Clear any previous server error
     try {
       await axios.delete(`/api/members/${id}`);
       fetchMembers();
@@ -168,11 +171,20 @@ function Members({ isOwner }) {
                   </Card.Text>
                   {isOwner && (
                     <>
-                      <Button variant="primary" className="me-2" onClick={() => handleEditMember(member)}>
-                        <FaEdit /> Edit
+                      <Button 
+                        variant="primary" 
+                        className="me-2" 
+                        onClick={() => handleEditMember(member)}
+                        disabled={isLoading}  // Disable when loading
+                      >
+                        {isLoading ? <Spinner animation="border" size="sm" /> : <FaEdit />} Edit
                       </Button>
-                      <Button variant="danger" onClick={() => handleRemoveMember(member._id)}>
-                        <FaTrash /> Remove
+                      <Button 
+                        variant="danger" 
+                        onClick={() => handleRemoveMember(member._id)} 
+                        disabled={isLoading}  // Disable when loading
+                      >
+                        {isLoading ? <Spinner animation="border" size="sm" /> : <FaTrash />} Remove
                       </Button>
                     </>
                   )}
@@ -183,8 +195,13 @@ function Members({ isOwner }) {
         </Row>
       )}
 
-      <Button variant="success" onClick={handleShow} className="mb-4">
-        <FaPlus /> Add Member
+      <Button 
+        variant="success" 
+        onClick={handleShow} 
+        className="mb-4"
+        disabled={isLoading}  // Disable when loading
+      >
+        {isLoading ? <Spinner animation="border" size="sm" /> : <FaPlus />} Add Member
       </Button>
 
       <Modal show={show} onHide={handleClose}>
@@ -226,14 +243,19 @@ function Members({ isOwner }) {
               <Form.Label>Workout Experience</Form.Label>
               <Form.Control type="text" name="workoutExperience" value={newMember.workoutExperience} onChange={handleChange} />
             </Form.Group>
+            {serverError && <p className="text-danger">{serverError}</p>}
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleSaveMember}>
-            {isEdit ? 'Update Member' : 'Add Member'}
+          <Button 
+            variant="primary" 
+            onClick={handleSaveMember} 
+            disabled={isLoading}  // Disable when loading
+          >
+            {isLoading ? <Spinner animation="border" size="sm" /> : (isEdit ? 'Update Member' : 'Add Member')}
           </Button>
         </Modal.Footer>
       </Modal>
