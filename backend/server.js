@@ -10,7 +10,7 @@ import membersRouter from './routes/memberRoutes.js'
 
 
 dotenv.config();
-const dbPassword = process.env.DB_PASSWORD;
+const mongoDbConnectionString = process.env.MONGODB_URL;
 
 
 
@@ -21,7 +21,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());  // This is important to parse JSON request bodies
 
 // MongoDB Atlas connection string
-const url = `mongodb+srv://kinsuksingh:${dbPassword}@gymmanagement.jbhc3.mongodb.net/gym_management?retryWrites=true&w=majority`;
+const url = mongoDbConnectionString;
 const client = new MongoClient(url);
 
 mongoose.connect(url)
